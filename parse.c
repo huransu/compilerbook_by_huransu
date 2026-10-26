@@ -28,13 +28,17 @@ Token *tokenize(char *p){
 			p += 2;
 			continue;
 		}
-		if(strncmp(p, "+", 1) == 0 || strncmp(p, "-", 1) == 0 || strncmp(p, "*", 1) == 0 || strncmp(p, "/", 1) == 0 || strncmp(p, "(", 1) == 0 || strncmp(p, ")", 1) == 0){
+		if(strncmp(p, "+", 1) == 0 || strncmp(p, "-", 1) == 0 || strncmp(p, "*", 1) == 0 || strncmp(p, "/", 1) == 0 || strncmp(p, "(", 1) == 0 || strncmp(p, ")", 1) == 0 || strncmp(p, ";", 1) == 0) {
 			cur = new_token(TK_RESERVED, cur, p++, 1);
 			continue;
 		}
 		if(isdigit(*p)){
 			cur = new_token(TK_NUM, cur, p, 1);
 			cur->val = strtol(p, &p, 10);
+			continue;
+		}
+		if('a' <= *p && *p <= 'z'){
+			cur = new_token(TK_IDENT, cur, p++, 1);
 			continue;
 		}
 		error_at(token->str, "cannot tokenize this");

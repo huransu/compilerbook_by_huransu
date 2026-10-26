@@ -1,7 +1,11 @@
 #include <stdbool.h> 
 
+#ifndef TOKEN
+#define TOKEN
+
 typedef enum {
 	TK_RESERVED,
+	TK_IDENT,
 	TK_NUM,
 	TK_EOF,
 } TokenKind;
@@ -15,6 +19,8 @@ struct Token {
 	char *str;
 	int len;
 };
+
+#endif
 
 bool at_eof();
 Token *new_token(TokenKind kind, Token *cur, char *str, int len);

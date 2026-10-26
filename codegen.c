@@ -1,5 +1,11 @@
 #include "9cc.h"
 #include "codegen.h"
+#include "parse.h"
+#include <stddef.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+Node *code[100];
 
 Node *new_node(NodeKind kind, Node *lhs, Node *rhs){
 	Node *node = calloc(1,sizeof(Node));
@@ -16,11 +22,24 @@ Node *new_node_num(int val){
 	return node;
 }
 
+Node *new_node_localvar(int offset){
+	Node *node = calloc(1,sizeof(Node));
+	node->kind = ND_LVAR;
+	node->offset = offset;
+	return node;
+}
+
 Node *primary() {
 	if(consume("(")){
 		Node *node = expr();
 		expect(")");
 		return node;
+	}
+	if(is_ascii_alphabet(token->str[0])) {
+		int indent = consume_indent();
+		if(indent){
+			return new_node_localvar(indent);
+		}
 	}
 	return new_node_num(expect_number());
 }
@@ -85,6 +104,7 @@ Node* relational(){
 			return node;
 		}
 	}
+	return node;
 }
 
 Node *equality() {
@@ -101,27 +121,44 @@ Node *equality() {
 			return node;
 		}
 	}
+	return node;
+}
+
+Node *assign() {
+	Node *node = equality();
+	if(consume("=")){
+		node = new_node(ND_ASSIGN, node, assign());
+	}
+	return node;
 }
 
 Node *expr() {
-	Node *node = equality();
+	return assign();
+}
 
-//	for(;;){
-//		if(consume('+')){
-//			node = new_node(ND_ADD, node, mul());
-//		}
-//		else if(consume('-')){
-//			node = new_node(ND_SUB, node, mul());
-//		}
-//		else{
-//			return node;
-//		}
-//	}
+Node *stmt() {
+	Node *node = expr();
+	expect(";");
+	return node;
+}
+
+void program() {
+	int i = 0;
+	while (!at_eof()){
+		code[i++] = stmt();
+	}
+	code[i] = NULL;
 }
 
 void gen(Node *node){
 	if(node->kind == ND_NUM){
 		printf("  push %d\n", node->val);
+		return;
+	}
+	if(node->kind == ND_LVAR){
+		printf("  push rbp\n");
+		printf("mov rbp, rsp\n");
+		printf("sub rsp, %d", node->offset);
 		return;
 	}
 

@@ -8,6 +8,11 @@
 
 Token *token;
 char *user_input;
+
+bool is_ascii_alphabet(char c){
+	return 'a' <= c && c <= 'z';
+}
+
 void error_at(char *loc, char *fmt, ...){
 	va_list ap;
 	va_start(ap, fmt);
@@ -26,6 +31,15 @@ bool consume(char* op){
 	token = token->next;
 	return true;
 }
+
+int consume_indent(char c){
+	if(token->kind != TK_IDENT || !is_ascii_alphabet(c)){
+		error_at(token->str, "%c is not indent", c);
+	}
+	token = token->next;
+	return (c - 'a' + 1) * 8;
+}
+
 void expect(char* op){
 	if(token->kind != TK_RESERVED || strlen(op) != token->len || memcmp(token->str, op, token->len)){
 		error_at(token->str, "this is not '%c'", op);
@@ -49,12 +63,14 @@ int main(int argc, char **argv){
 	}
 	user_input = argv[1];
 	token = tokenize(user_input);	
-	Node *node = expr();
+	program();
 
 	printf(".intel_syntax noprefix\n");
 	printf(".globl main\n");
 	printf("main:\n");
-	gen(node);
+	for(int i = 0; i < 100 && code[i] != NULL; i++){
+		gen(code[i]);
+	}
 
 	printf("  pop rax\n");
 	printf("  ret\n");
