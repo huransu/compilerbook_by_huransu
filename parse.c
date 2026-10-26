@@ -28,7 +28,7 @@ Token *tokenize(char *p){
 			p += 2;
 			continue;
 		}
-		if(strncmp(p, "+", 1) == 0 || strncmp(p, "-", 1) == 0 || strncmp(p, "*", 1) == 0 || strncmp(p, "/", 1) == 0 || strncmp(p, "(", 1) == 0 || strncmp(p, ")", 1) == 0 || strncmp(p, ";", 1) == 0) {
+		if(strncmp(p, "+", 1) == 0 || strncmp(p, "-", 1) == 0 || strncmp(p, "*", 1) == 0 || strncmp(p, "/", 1) == 0 || strncmp(p, "(", 1) == 0 || strncmp(p, ")", 1) == 0 || strncmp(p, ";", 1) == 0 || strncmp(p, "=", 1) == 0) {
 			cur = new_token(TK_RESERVED, cur, p++, 1);
 			continue;
 		}
